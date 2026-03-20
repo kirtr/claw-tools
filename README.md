@@ -80,6 +80,36 @@ python todoist/todoist.py add "Fix the thing" --project "Work" --due "next Frida
 
 ---
 
+### 🔐 Codex Auth (`codex-auth/codex_auth.py`)
+
+Manage OpenAI Codex OAuth tokens for OpenClaw. Prevents the recurring "refresh token burned" problem by proactively refreshing tokens before they expire.
+
+Keeps both the Codex CLI (`~/.codex/auth.json`) and OpenClaw auth profiles in sync, then triggers a live secrets reload — no gateway restart needed.
+
+**Prerequisites:** `codex login` must have been run at least once.
+
+#### Commands
+
+```bash
+# Show token status (expiry, sync state)
+python codex-auth/codex_auth.py status
+
+# Refresh tokens now (updates Codex CLI + OpenClaw + reloads gateway)
+python codex-auth/codex_auth.py refresh
+
+# Install cron job (every 7 days at 3 AM)
+python codex-auth/codex_auth.py install
+
+# Remove cron job
+python codex-auth/codex_auth.py uninstall
+```
+
+#### Why?
+
+OpenAI uses single-use rotating refresh tokens. If the gateway tries to refresh and anything goes wrong (network blip, race condition, double-refresh), the token burns permanently. This cron job refreshes proactively so the gateway always has a valid access token and never needs to refresh itself.
+
+---
+
 ## Adding New Tools
 
 Each tool lives in its own directory and follows the same pattern:
