@@ -110,6 +110,106 @@ OpenAI uses single-use rotating refresh tokens. If the gateway tries to refresh 
 
 ---
 
+### 🎧 Feedfilter (`feedfilter/feedfilter.py`)
+
+Create filtered podcast RSS feeds from broader upstream feeds. Each filter keeps
+items whose title starts with a configured prefix, rewrites the feed metadata,
+and serves the result over HTTP.
+
+Configuration lives in `~/.config/feedfilter/feedfilter.db`.
+
+#### Commands
+
+```bash
+# Add or replace a filter
+python feedfilter/feedfilter.py add \
+  --name bitcoin_fundamentals \
+  --upstream "https://example.com/feed.xml" \
+  --prefix BTC \
+  --title "Bitcoin Fundamentals"
+
+# Optional custom artwork
+python feedfilter/feedfilter.py set-image --name bitcoin_fundamentals --url "https://example.com/image.jpg"
+
+# List configured filters
+python feedfilter/feedfilter.py list
+
+# Serve locally by default
+python feedfilter/feedfilter.py serve --port 8044
+
+# Explicitly expose beyond localhost
+python feedfilter/feedfilter.py serve --host 0.0.0.0 --port 8044
+```
+
+#### Notes
+
+- Python stdlib only.
+- Default bind host is `127.0.0.1`; use `--host 0.0.0.0` only when the feed
+  should be reachable from other machines.
+
+---
+
+### 🎙️ Podqueue (`podqueue/podqueue.py`)
+
+Maintain a personal podcast queue from YouTube, podcast pages, direct media URLs,
+or other `yt-dlp`-supported sources. Downloads media, stores metadata in SQLite,
+generates an RSS feed, and serves feed/media files for podcast clients.
+
+Data lives in `~/podqueue` by default.
+
+#### Dependencies
+
+- `yt-dlp`
+- `ffmpeg`
+
+#### Commands
+
+```bash
+# Download audio and add to the queue
+python podqueue/podqueue.py add "https://example.com/watch-or-episode-url"
+
+# Download video instead of audio-only
+python podqueue/podqueue.py add --video "https://example.com/watch-url"
+
+# List queued episodes
+python podqueue/podqueue.py list
+
+# Remove an episode and its local media file
+python podqueue/podqueue.py remove 12
+
+# Regenerate feed.xml
+python podqueue/podqueue.py feed
+
+# Serve locally by default
+python podqueue/podqueue.py serve --port 8043
+
+# Explicitly expose beyond localhost
+python podqueue/podqueue.py serve --host 0.0.0.0 --port 8043
+```
+
+#### Environment
+
+```bash
+PODQUEUE_DIR=~/podqueue
+PODQUEUE_PORT=8043
+PODQUEUE_HOST=127.0.0.1
+PODQUEUE_PUBLIC_HOST=athena
+PODQUEUE_BASE_URL=http://athena:8043/media/
+PODQUEUE_TITLE="Kirt's Queue"
+PODQUEUE_IMAGE=http://athena:8043/media/cover.jpg
+YTDLP_BIN=yt-dlp
+FFMPEG_BIN=ffmpeg
+```
+
+#### Notes
+
+- Default bind host is `127.0.0.1`; use `--host 0.0.0.0` only when the feed
+  should be reachable from other machines.
+- `remove` deletes the local media file as well as the database row.
+- Be mindful of copyright/licensing and disk usage when downloading media.
+
+---
+
 ## Adding New Tools
 
 Each tool lives in its own directory and follows the same pattern:
